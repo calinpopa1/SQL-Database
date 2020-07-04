@@ -1,0 +1,46 @@
+CREATE TABLE user(
+id INTEGER,
+name TEXT
+);
+CREATE TABLE activity(
+id INTEGER,
+name TEXT
+);
+CREATE TABLE user_activity(
+activity_id INTEGER,
+user_id INTEGER,
+occurrence TIMESTAMP,
+FOREIGN KEY(activity_id) REFERENCES activity(id),
+FOREIGN KEY(user_id) REFERENCES user(id)
+);
+
+INSERT INTO user VALUES (1,"John Smith");
+INSERT INTO user VALUES (2,"Robert Downey");
+INSERT INTO user VALUES (3,"Jessica Swan");
+
+INSERT INTO activity VALUES (1,"login");
+INSERT INTO activity VALUES (2,"click");
+INSERT INTO activity VALUES (3,"view");
+
+INSERT INTO user_activity VALUES (1,1,'2019-10-11 09:45:44');
+INSERT INTO user_activity VALUES (1,2,'2019-10-13 08:45:44');
+INSERT INTO user_activity VALUES (3,2,'2019-10-12 11:45:44');
+INSERT INTO user_activity VALUES (3,1,'2019-10-14 12:45:44');
+INSERT INTO user_activity VALUES (2,1,'2019-10-15 12:45:44');
+INSERT INTO user_activity VALUES (2,3,'2019-11-14 10:45:44');
+INSERT INTO user_activity VALUES (3,3,'2019-12-19 12:55:44');
+INSERT INTO user_activity VALUES (1,1,'2019-10-11 07:45:42');
+INSERT INTO user_activity VALUES (1,1,'2019-11-11 08:45:42');
+INSERT INTO user_activity VALUES (3,3,'2019-10-19 12:55:44');
+INSERT INTO user_activity VALUES (3,3,'2019-10-21 12:55:44');
+
+
+SELECT user.name AS user_name, activity.name AS activity_name, amount, first_occurrence, last_occurrence
+FROM user, activity ,(
+SELECT activity_id, user_id , COUNT(*) AS amount, MIN(occurrence) AS first_occurrence, MAX(occurrence) AS last_occurrence
+FROM user_activity
+WHERE 
+occurrence >= '2019-10-01 00:00:00'
+AND  occurrence <= '2019-10-31 23:59:59'
+GROUP BY activity_id , user_id) AS ua
+WHERE (ua.user_id=user.id) AND (ua.activity_id=activity.id)
